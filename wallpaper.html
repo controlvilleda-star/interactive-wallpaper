@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,7 +85,7 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(125deg, rgba(255,255,255,.05), transparent 38%),
+        linear-gradient(125deg, rgba(255, 255, 255, .05), transparent 38%),
         linear-gradient(270deg, transparent, rgba(244, 155, 95, .18), transparent);
       mix-blend-mode: screen;
       opacity: .75;
@@ -96,6 +97,7 @@
         transform: scale(1.04) translate3d(-1.5%, 0, 0);
         filter: saturate(1.08) contrast(1.03);
       }
+
       to {
         transform: scale(1.1) translate3d(1.5%, -1%, 0);
         filter: saturate(1.22) contrast(1.08);
@@ -107,6 +109,7 @@
         transform: translateX(-8%);
         opacity: .45;
       }
+
       to {
         transform: translateX(8%);
         opacity: .86;
@@ -129,8 +132,8 @@
       z-index: -1;
       opacity: 0.08;
       background-image:
-        linear-gradient(rgba(255,255,255,.4) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.4) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, .4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .4) 1px, transparent 1px);
       background-size: 64px 64px;
       mask-image: linear-gradient(90deg, transparent, black 58%);
     }
@@ -163,7 +166,7 @@
       inset: 0;
       border-radius: inherit;
       pointer-events: none;
-      background: linear-gradient(145deg, rgba(255,255,255,.14), transparent 42%);
+      background: linear-gradient(145deg, rgba(255, 255, 255, .14), transparent 42%);
     }
 
     .clock {
@@ -234,15 +237,15 @@
       height: 32px;
       display: grid;
       place-items: center;
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1px solid rgba(255, 255, 255, .18);
       border-radius: 7px;
-      background: rgba(255,255,255,.08);
+      background: rgba(255, 255, 255, .08);
       color: var(--text);
       cursor: pointer;
     }
 
     .icon-button:hover {
-      background: rgba(255,255,255,.15);
+      background: rgba(255, 255, 255, .15);
     }
 
     .month-grid {
@@ -270,91 +273,72 @@
     }
 
     .day {
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.86);
+      background: rgba(255, 255, 255, .06);
+      color: rgba(255, 255, 255, .86);
     }
 
     .day.other {
-      color: rgba(255,255,255,.28);
-      background: rgba(255,255,255,.025);
+      color: rgba(255, 255, 255, .28);
+      background: rgba(255, 255, 255, .025);
     }
 
     .day.today {
       background: linear-gradient(135deg, var(--accent), #f15f72);
       color: white;
       font-weight: 700;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.22) inset, 0 8px 24px rgba(244, 122, 96, .28);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, .22) inset, 0 8px 24px rgba(244, 122, 96, .28);
     }
 
-    .web {
+    .notepad {
       display: grid;
-      min-height: 0;
+      min-height: 250px;
       min-width: 320px;
-      resize: both;
-      overflow: hidden;
-      grid-template-rows: auto auto 1fr;
+      grid-template-rows: auto 1fr;
       background: var(--panel-strong);
     }
 
-    .web-head {
+    .notepad-head {
       padding: 10px 12px 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      border-bottom: 1px solid rgba(255,255,255,.1);
+      border-bottom: 1px solid rgba(255, 255, 255, .1);
     }
 
-    .web-title {
-      min-width: 0;
+    .notepad-title {
       font-size: 15px;
       font-weight: 650;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    .toolbar {
-      display: grid;
-      grid-template-columns: 1fr 44px;
-      gap: 8px;
-      padding: 10px 12px;
+    .notepad-body {
+      padding: 12px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
-    .toolbar input {
+    .notepad-body textarea {
       width: 100%;
-      min-width: 0;
-      height: 34px;
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 7px;
-      padding: 0 10px;
-      outline: none;
+      height: 100%;
+      flex-grow: 1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 10px;
       color: var(--text);
-      background: rgba(255,255,255,.08);
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
     }
 
-    .toolbar input:focus {
+    .notepad-body textarea:focus {
       border-color: rgba(82, 199, 213, .7);
       box-shadow: 0 0 0 3px rgba(82, 199, 213, .12);
-    }
-
-    .web-frame-shell {
-      min-height: 0;
-      margin: 0 14px 14px;
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 8px;
-      overflow: hidden;
-      resize: vertical;
-      height: 100%;
-      min-height: 80px;
-      background: rgba(255,255,255,.08);
-    }
-
-    .web-frame {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: #0b0f15;
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .hide {
@@ -380,6 +364,7 @@
     }
   </style>
 </head>
+
 <body>
   <main class="stage">
     <div class="video-wrap" aria-hidden="true">
@@ -402,25 +387,23 @@
         <div class="calendar-head">
           <div class="calendar-title" id="monthTitle">Mes</div>
           <div class="calendar-actions">
-            <button class="icon-button" id="prevMonth" type="button" title="Mes anterior" aria-label="Mes anterior">‹</button>
+            <button class="icon-button" id="prevMonth" type="button" title="Mes anterior"
+              aria-label="Mes anterior">‹</button>
             <button class="icon-button" id="todayMonth" type="button" title="Hoy" aria-label="Volver a hoy">•</button>
-            <button class="icon-button" id="nextMonth" type="button" title="Mes siguiente" aria-label="Mes siguiente">›</button>
+            <button class="icon-button" id="nextMonth" type="button" title="Mes siguiente"
+              aria-label="Mes siguiente">›</button>
           </div>
         </div>
         <div class="month-grid" id="monthGrid" aria-label="Calendario mensual"></div>
       </article>
 
-      <article class="widget web">
-        <div class="web-head">
-          <div class="web-title">Pop window web</div>
-          <button class="icon-button" id="toggleWeb" type="button" title="Ocultar o mostrar pagina" aria-label="Ocultar o mostrar pagina">▣</button>
+      <article class="widget notepad">
+        <div class="notepad-head">
+          <div class="notepad-title">Blog de notas</div>
+          <button class="icon-button" id="clearNotes" type="button" title="Borrar notas" aria-label="Borrar notas">🗑</button>
         </div>
-        <form class="toolbar" id="webForm">
-          <input id="webUrl" type="url" value="" placeholder="https://..." autocomplete="off" spellcheck="false" aria-label="URL de pagina">
-          <button class="icon-button" type="submit" title="Abrir pagina" aria-label="Abrir pagina">↵</button>
-        </form>
-        <div class="web-frame-shell" id="webShell">
-          <iframe class="web-frame" id="webFrame" title="Pagina abierta"></iframe>
+        <div class="notepad-body">
+          <textarea id="notepadText" placeholder="Escribe tus notas aquí..." spellcheck="false"></textarea>
         </div>
       </article>
     </section>
@@ -443,43 +426,9 @@
     const dateNode = document.querySelector("#date");
     const monthTitle = document.querySelector("#monthTitle");
     const monthGrid = document.querySelector("#monthGrid");
-    const webForm = document.querySelector("#webForm");
-    const webUrl = document.querySelector("#webUrl");
-    const webFrame = document.querySelector("#webFrame");
-    const webShell = document.querySelector("#webShell");
-    const toggleWeb = document.querySelector("#toggleWeb");
+    const notepadText = document.querySelector("#notepadText");
+    const clearNotes = document.querySelector("#clearNotes");
     const videoWrap = document.querySelector(".video-wrap");
-    const startPage = `
-      <!doctype html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          html, body {
-            height: 100%;
-            margin: 0;
-            background: #0b0f15;
-            color: rgba(255,255,255,.72);
-            font: 14px Segoe UI, sans-serif;
-          }
-          body {
-            display: grid;
-            place-items: center;
-          }
-          .mark {
-            width: 42px;
-            height: 42px;
-            border: 1px solid rgba(255,255,255,.18);
-            border-radius: 8px;
-            display: grid;
-            place-items: center;
-            color: rgba(255,255,255,.84);
-            background: rgba(255,255,255,.05);
-          }
-        </style>
-      </head>
-      <body><div class="mark">↵</div></body>
-      </html>`;
 
     let viewedMonth = new Date();
     viewedMonth.setDate(1);
@@ -564,37 +513,24 @@
       renderCalendar();
     });
 
-    webForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const url = normalizeUrl(webUrl.value);
-      if (!url) {
-        webFrame.removeAttribute("src");
-        webFrame.srcdoc = startPage;
-        localStorage.removeItem("wallpaper.webUrl");
-        return;
+    // Load saved notes
+    const savedNotes = localStorage.getItem("wallpaper.notes");
+    if (savedNotes) {
+      notepadText.value = savedNotes;
+    }
+
+    // Save notes on input
+    notepadText.addEventListener("input", () => {
+      localStorage.setItem("wallpaper.notes", notepadText.value);
+    });
+
+    // Clear notes button
+    clearNotes.addEventListener("click", () => {
+      if (confirm("¿Estás seguro de que quieres borrar todas tus notas?")) {
+        notepadText.value = "";
+        localStorage.removeItem("wallpaper.notes");
       }
-      webUrl.value = url;
-      webFrame.removeAttribute("srcdoc");
-      webFrame.src = url;
-      localStorage.setItem("wallpaper.webUrl", url);
     });
-
-    toggleWeb.addEventListener("click", () => {
-      webShell.classList.toggle("hide");
-      localStorage.setItem("wallpaper.webHidden", webShell.classList.contains("hide") ? "1" : "0");
-    });
-
-    const savedUrl = localStorage.getItem("wallpaper.webUrl");
-    if (savedUrl && savedUrl !== "https://www.google.com/search?igu=1") {
-      webUrl.value = savedUrl;
-      webFrame.src = savedUrl;
-    } else {
-      localStorage.removeItem("wallpaper.webUrl");
-      webFrame.srcdoc = startPage;
-    }
-    if (localStorage.getItem("wallpaper.webHidden") === "1") {
-      webShell.classList.add("hide");
-    }
 
     mountVideoIfPossible();
     tick();
@@ -602,4 +538,5 @@
     setInterval(tick, 1000);
   </script>
 </body>
+
 </html>

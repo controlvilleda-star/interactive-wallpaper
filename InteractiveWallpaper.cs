@@ -81,10 +81,10 @@ namespace InteractiveWallpaper
             set { SetString("CalendarIcsUrl", value); }
         }
 
-        public string WebUrl
+        public string NotepadText
         {
-            get { return GetString("WebUrl", "https://calendar.google.com/calendar/u/0/r"); }
-            set { SetString("WebUrl", value); }
+            get { return GetString("NotepadText", ""); }
+            set { SetString("NotepadText", value); }
         }
 
         public static string DataDirectory
@@ -105,7 +105,7 @@ namespace InteractiveWallpaper
         public static AppSettings Load()
         {
             AppSettings settings = new AppSettings();
-            settings.WebUrl = "https://calendar.google.com/calendar/u/0/r";
+            settings.NotepadText = "";
 
             if (!File.Exists(ConfigPath))
             {
@@ -223,15 +223,14 @@ namespace InteractiveWallpaper
         private NotifyIcon trayIcon;
         private WidgetPanel clockWidget;
         private WidgetPanel calendarWidget;
-        private WidgetPanel webWidget;
+        private WidgetPanel notepadWidget;
         private Label clockTimeLabel;
         private Label clockDateLabel;
         private Label monthLabel;
         private TableLayoutPanel monthGrid;
         private FlowLayoutPanel eventsPanel;
         private Label eventsStatusLabel;
-        private TextBox webUrlBox;
-        private WebBrowser webBrowser;
+        private TextBox notepadTextBox;
 
         public MainForm(AppSettings settings, bool wallpaperMode)
         {
@@ -263,7 +262,7 @@ namespace InteractiveWallpaper
             BuildCommandDock();
             BuildClockWidget();
             BuildCalendarWidget();
-            BuildWebWidget();
+            BuildNotepadWidget();
 
             clockTimer.Interval = 1000;
             clockTimer.Tick += delegate { UpdateClock(); };
@@ -337,7 +336,7 @@ namespace InteractiveWallpaper
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Mostrar/Ocultar reloj", null, delegate { ToggleWidget(clockWidget, "Clock"); });
             menu.Items.Add("Mostrar/Ocultar calendario", null, delegate { ToggleWidget(calendarWidget, "Calendar"); });
-            menu.Items.Add("Mostrar/Ocultar web", null, delegate { ToggleWidget(webWidget, "Web"); });
+            menu.Items.Add("Mostrar/Ocultar notas", null, delegate { ToggleWidget(notepadWidget, "Notepad"); });
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Salir", null, delegate { Close(); });
 
@@ -362,7 +361,7 @@ namespace InteractiveWallpaper
 
             AddDockButton(dock, "Reloj", delegate { ToggleWidget(clockWidget, "Clock"); });
             AddDockButton(dock, "Cal", delegate { ToggleWidget(calendarWidget, "Calendar"); });
-            AddDockButton(dock, "Web", delegate { ToggleWidget(webWidget, "Web"); });
+            AddDockButton(dock, "Notas", delegate { ToggleWidget(notepadWidget, "Notepad"); });
             AddDockButton(dock, "Ajustes", delegate { ShowSettings(); });
             AddDockButton(dock, "Salir", delegate { Close(); });
 
@@ -469,50 +468,32 @@ namespace InteractiveWallpaper
             RenderMonth();
         }
 
-        private void BuildWebWidget()
+        private void BuildNotepadWidget()
         {
-            webWidget = new WidgetPanel("Ventana web");
-            webWidget.Size = new Size(620, 410);
-            webWidget.Location = new Point(Math.Max(500, Width - 700), 150);
-            webWidget.ApplySettings(settings, "Web");
+            notepadWidget = new WidgetPanel("Blog de notas");
+            notepadWidget.Size = new Size(380, 280);
+            notepadWidget.Location = new Point(Math.Max(500, Width - 460), 150);
+            notepadWidget.ApplySettings(settings, "Notepad");
 
-            Panel topBar = new Panel();
-            topBar.Dock = DockStyle.Top;
-            topBar.Height = 36;
-            topBar.Padding = new Padding(0, 0, 0, 6);
+            notepadTextBox = new TextBox();
+            notepadTextBox.Multiline = true;
+            notepadTextBox.ScrollBars = ScrollBars.Vertical;
+            notepadTextBox.Dock = DockStyle.Fill;
+            notepadTextBox.Text = settings.NotepadText;
+            notepadTextBox.BorderStyle = BorderStyle.None;
+            notepadTextBox.BackColor = Color.FromArgb(28, 255, 255, 255);
+            notepadTextBox.ForeColor = Color.White;
+            notepadTextBox.Font = new Font("Segoe UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point);
+            notepadTextBox.AcceptsReturn = true;
+            notepadTextBox.AcceptsTab = true;
 
-            Button goButton = MakeSmallButton("Ir");
-            goButton.Dock = DockStyle.Right;
-            goButton.Width = 46;
-            goButton.Click += delegate { NavigateWeb(); };
-
-            webUrlBox = new TextBox();
-            webUrlBox.Dock = DockStyle.Fill;
-            webUrlBox.Text = settings.WebUrl;
-            webUrlBox.BorderStyle = BorderStyle.FixedSingle;
-            webUrlBox.KeyDown += delegate(object sender, KeyEventArgs e)
+            notepadTextBox.TextChanged += delegate
             {
-                if (e.KeyCode == Keys.Enter)
-                {
-                    e.SuppressKeyPress = true;
-                    NavigateWeb();
-                }
+                settings.NotepadText = notepadTextBox.Text;
             };
 
-            topBar.Controls.Add(webUrlBox);
-            topBar.Controls.Add(goButton);
-
-            webBrowser = new WebBrowser();
-            webBrowser.Dock = DockStyle.Fill;
-            webBrowser.ScriptErrorsSuppressed = true;
-            webBrowser.IsWebBrowserContextMenuEnabled = true;
-            webBrowser.AllowWebBrowserDrop = false;
-
-            webWidget.Body.Controls.Add(webBrowser);
-            webWidget.Body.Controls.Add(topBar);
-            Controls.Add(webWidget);
-
-            NavigateWeb();
+            notepadWidget.Body.Controls.Add(notepadTextBox);
+            Controls.Add(notepadWidget);
         }
 
         private Button MakeSmallButton(string text)
@@ -705,40 +686,6 @@ namespace InteractiveWallpaper
             eventsPanel.Controls.Add(label);
         }
 
-        private void NavigateWeb()
-        {
-            string url = NormalizeUrl(webUrlBox.Text.Trim());
-            if (url.Length == 0)
-            {
-                return;
-            }
-
-            settings.WebUrl = url;
-            settings.Save();
-            webUrlBox.Text = url;
-            try
-            {
-                webBrowser.Navigate(url);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message, "No se pudo abrir la pagina", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        private string NormalizeUrl(string url)
-        {
-            if (url.Length == 0)
-            {
-                return "";
-            }
-            if (url.IndexOf("://", StringComparison.Ordinal) < 0)
-            {
-                return "https://" + url;
-            }
-            return url;
-        }
-
         private void ToggleWidget(WidgetPanel widget, string key)
         {
             widget.Visible = !widget.Visible;
@@ -753,8 +700,6 @@ namespace InteractiveWallpaper
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
                     settings.Save();
-                    webUrlBox.Text = settings.WebUrl;
-                    NavigateWeb();
                     RefreshCalendarEvents();
                 }
             }
@@ -764,7 +709,7 @@ namespace InteractiveWallpaper
         {
             clockWidget.SaveSettings(settings, "Clock");
             calendarWidget.SaveSettings(settings, "Calendar");
-            webWidget.SaveSettings(settings, "Web");
+            notepadWidget.SaveSettings(settings, "Notepad");
             settings.Save();
         }
     }
@@ -935,7 +880,6 @@ namespace InteractiveWallpaper
     {
         private readonly AppSettings settings;
         private readonly TextBox calendarUrlTextBox;
-        private readonly TextBox webUrlTextBox;
 
         public SettingsForm(AppSettings settings)
         {
@@ -943,7 +887,7 @@ namespace InteractiveWallpaper
 
             Text = "Ajustes del wallpaper";
             StartPosition = FormStartPosition.CenterParent;
-            Size = new Size(720, 330);
+            Size = new Size(720, 240);
             MinimizeBox = false;
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -953,8 +897,7 @@ namespace InteractiveWallpaper
             layout.Dock = DockStyle.Fill;
             layout.Padding = new Padding(16);
             layout.ColumnCount = 1;
-            layout.RowCount = 6;
-            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowCount = 4;
             layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -976,15 +919,6 @@ namespace InteractiveWallpaper
             helpLabel.ForeColor = Color.DimGray;
             helpLabel.Height = 38;
 
-            Label webLabel = new Label();
-            webLabel.Text = "Pagina de la ventana web";
-            webLabel.Dock = DockStyle.Top;
-            webLabel.Height = 24;
-
-            webUrlTextBox = new TextBox();
-            webUrlTextBox.Dock = DockStyle.Top;
-            webUrlTextBox.Text = settings.WebUrl;
-
             FlowLayoutPanel buttons = new FlowLayoutPanel();
             buttons.Dock = DockStyle.Fill;
             buttons.FlowDirection = FlowDirection.RightToLeft;
@@ -996,7 +930,6 @@ namespace InteractiveWallpaper
             save.Click += delegate
             {
                 settings.CalendarIcsUrl = calendarUrlTextBox.Text.Trim();
-                settings.WebUrl = webUrlTextBox.Text.Trim();
             };
 
             Button cancel = new Button();
@@ -1010,9 +943,7 @@ namespace InteractiveWallpaper
             layout.Controls.Add(calendarLabel, 0, 0);
             layout.Controls.Add(calendarUrlTextBox, 0, 1);
             layout.Controls.Add(helpLabel, 0, 2);
-            layout.Controls.Add(webLabel, 0, 3);
-            layout.Controls.Add(webUrlTextBox, 0, 4);
-            layout.Controls.Add(buttons, 0, 5);
+            layout.Controls.Add(buttons, 0, 3);
             Controls.Add(layout);
 
             AcceptButton = save;
