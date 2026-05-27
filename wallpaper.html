@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Wallpaper</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --panel: rgba(12, 15, 20, 0.64);
+      --panel-strong: rgba(13, 17, 24, 0.78);
+      --line: rgba(255, 255, 255, 0.18);
+      --text: #f7fbff;
+      --muted: rgba(235, 244, 247, 0.72);
+      --accent: #f49b5f;
+      --cool: #52c7d5;
+      --shadow: 0 20px 70px rgba(0, 0, 0, 0.42);
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #080b0f;
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .stage {
+      position: fixed;
+      inset: 0;
+      isolation: isolate;
+      background: #080b0f;
+    }
+
+    .video-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: -3;
+      background: #080b0f;
+      background-image: url("https://i.ytimg.com/vi/PQoLr7eVLUI/maxresdefault.jpg");
+      background-position: center;
+      background-size: cover;
+    }
+
+    .video-wrap iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vw;
+      height: 56.25vw;
+      min-width: 177.78vh;
+      min-height: 100vh;
+      transform: translate(-50%, -50%);
+      border: 0;
+      pointer-events: none;
+      filter: saturate(1.05) contrast(1.04);
+    }
+
+    .ambient-fallback {
+      position: absolute;
+      inset: -4%;
+      background:
+        linear-gradient(110deg, rgba(20, 9, 42, .58), transparent 34%, rgba(245, 121, 57, .34) 58%, rgba(8, 13, 20, .46)),
+        url("https://i.ytimg.com/vi/PQoLr7eVLUI/maxresdefault.jpg") center / cover no-repeat;
+      transform: scale(1.04);
+      animation: ambientDrift 18s ease-in-out infinite alternate;
+    }
+
+    .ambient-fallback::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(125deg, rgba(255,255,255,.05), transparent 38%),
+        linear-gradient(270deg, transparent, rgba(244, 155, 95, .18), transparent);
+      mix-blend-mode: screen;
+      opacity: .75;
+      animation: lightSweep 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambientDrift {
+      from {
+        transform: scale(1.04) translate3d(-1.5%, 0, 0);
+        filter: saturate(1.08) contrast(1.03);
+      }
+      to {
+        transform: scale(1.1) translate3d(1.5%, -1%, 0);
+        filter: saturate(1.22) contrast(1.08);
+      }
+    }
+
+    @keyframes lightSweep {
+      from {
+        transform: translateX(-8%);
+        opacity: .45;
+      }
+      to {
+        transform: translateX(8%);
+        opacity: .86;
+      }
+    }
+
+    .wash {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(90deg, rgba(5, 7, 10, 0.42), rgba(5, 7, 10, 0.16) 46%, rgba(5, 7, 10, 0.74)),
+        radial-gradient(circle at 72% 28%, rgba(255, 165, 96, 0.2), transparent 28%),
+        linear-gradient(180deg, rgba(4, 6, 9, 0.25), rgba(4, 6, 9, 0.72));
+    }
+
+    .grain {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.08;
+      background-image:
+        linear-gradient(rgba(255,255,255,.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.4) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(90deg, transparent, black 58%);
+    }
+
+    .rail {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      bottom: 24px;
+      width: min(410px, calc(100vw - 48px));
+      display: grid;
+      grid-template-rows: auto auto minmax(220px, 1fr);
+      gap: 12px;
+      align-content: start;
+    }
+
+    .widget {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(1.18);
+    }
+
+    .widget::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(145deg, rgba(255,255,255,.14), transparent 42%);
+    }
+
+    .clock {
+      padding: 22px 22px 20px;
+      min-height: 154px;
+    }
+
+    .eyebrow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--cool);
+      box-shadow: 0 0 18px var(--cool);
+    }
+
+    .time {
+      margin-top: 4px;
+      font-size: clamp(48px, 7vh, 76px);
+      line-height: 1;
+      font-weight: 300;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .date {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      text-transform: capitalize;
+    }
+
+    .calendar {
+      padding: 16px;
+    }
+
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .calendar-title {
+      font-size: 18px;
+      font-weight: 650;
+      text-transform: capitalize;
+    }
+
+    .calendar-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-button {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 7px;
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .icon-button:hover {
+      background: rgba(255,255,255,.15);
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .day-name,
+    .day {
+      min-width: 0;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .day-name {
+      height: 20px;
+      color: rgba(245, 250, 252, .6);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .day {
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.86);
+    }
+
+    .day.other {
+      color: rgba(255,255,255,.28);
+      background: rgba(255,255,255,.025);
+    }
+
+    .day.today {
+      background: linear-gradient(135deg, var(--accent), #f15f72);
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.22) inset, 0 8px 24px rgba(244, 122, 96, .28);
+    }
+
+    .web {
+      display: grid;
+      min-height: 0;
+      min-width: 320px;
+      resize: both;
+      overflow: hidden;
+      grid-template-rows: auto auto 1fr;
+      background: var(--panel-strong);
+    }
+
+    .web-head {
+      padding: 10px 12px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+
+    .web-title {
+      min-width: 0;
+      font-size: 15px;
+      font-weight: 650;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+
+    .toolbar input {
+      width: 100%;
+      min-width: 0;
+      height: 34px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 7px;
+      padding: 0 10px;
+      outline: none;
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+    }
+
+    .toolbar input:focus {
+      border-color: rgba(82, 199, 213, .7);
+      box-shadow: 0 0 0 3px rgba(82, 199, 213, .12);
+    }
+
+    .web-frame-shell {
+      min-height: 0;
+      margin: 0 14px 14px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px;
+      overflow: hidden;
+      resize: vertical;
+      height: 100%;
+      min-height: 80px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .web-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #0b0f15;
+    }
+
+    .hide {
+      display: none;
+    }
+
+    @media (max-width: 720px) {
+      .rail {
+        top: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: calc(100vw - 24px);
+      }
+
+      .clock {
+        min-height: 132px;
+        padding: 18px;
+      }
+
+      .time {
+        font-size: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="video-wrap" aria-hidden="true">
+      <div class="ambient-fallback"></div>
+    </div>
+    <div class="wash"></div>
+    <div class="grain"></div>
+
+    <section class="rail" aria-label="Widgets">
+      <article class="widget clock">
+        <div class="eyebrow">
+          <span>Escritorio vivo</span>
+          <span class="live-dot" aria-hidden="true"></span>
+        </div>
+        <div class="time" id="time">00:00</div>
+        <div class="date" id="date">Cargando fecha</div>
+      </article>
+
+      <article class="widget calendar">
+        <div class="calendar-head">
+          <div class="calendar-title" id="monthTitle">Mes</div>
+          <div class="calendar-actions">
+            <button class="icon-button" id="prevMonth" type="button" title="Mes anterior" aria-label="Mes anterior">‹</button>
+            <button class="icon-button" id="todayMonth" type="button" title="Hoy" aria-label="Volver a hoy">•</button>
+            <button class="icon-button" id="nextMonth" type="button" title="Mes siguiente" aria-label="Mes siguiente">›</button>
+          </div>
+        </div>
+        <div class="month-grid" id="monthGrid" aria-label="Calendario mensual"></div>
+      </article>
+
+      <article class="widget web">
+        <div class="web-head">
+          <div class="web-title">Pop window web</div>
+          <button class="icon-button" id="toggleWeb" type="button" title="Ocultar o mostrar pagina" aria-label="Ocultar o mostrar pagina">▣</button>
+        </div>
+        <form class="toolbar" id="webForm">
+          <input id="webUrl" type="url" value="" placeholder="https://..." autocomplete="off" spellcheck="false" aria-label="URL de pagina">
+          <button class="icon-button" type="submit" title="Abrir pagina" aria-label="Abrir pagina">↵</button>
+        </form>
+        <div class="web-frame-shell" id="webShell">
+          <iframe class="web-frame" id="webFrame" title="Pagina abierta"></iframe>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const spanish = new Intl.DateTimeFormat("es-ES", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    const monthFormatter = new Intl.DateTimeFormat("es-ES", {
+      month: "long",
+      year: "numeric"
+    });
+
+    const timeNode = document.querySelector("#time");
+    const dateNode = document.querySelector("#date");
+    const monthTitle = document.querySelector("#monthTitle");
+    const monthGrid = document.querySelector("#monthGrid");
+    const webForm = document.querySelector("#webForm");
+    const webUrl = document.querySelector("#webUrl");
+    const webFrame = document.querySelector("#webFrame");
+    const webShell = document.querySelector("#webShell");
+    const toggleWeb = document.querySelector("#toggleWeb");
+    const videoWrap = document.querySelector(".video-wrap");
+    const startPage = `
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          html, body {
+            height: 100%;
+            margin: 0;
+            background: #0b0f15;
+            color: rgba(255,255,255,.72);
+            font: 14px Segoe UI, sans-serif;
+          }
+          body {
+            display: grid;
+            place-items: center;
+          }
+          .mark {
+            width: 42px;
+            height: 42px;
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            color: rgba(255,255,255,.84);
+            background: rgba(255,255,255,.05);
+          }
+        </style>
+      </head>
+      <body><div class="mark">↵</div></body>
+      </html>`;
+
+    let viewedMonth = new Date();
+    viewedMonth.setDate(1);
+
+    function pad(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function tick() {
+      const now = new Date();
+      timeNode.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      dateNode.textContent = spanish.format(now);
+    }
+
+    function sameDate(a, b) {
+      return a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate();
+    }
+
+    function renderCalendar() {
+      const today = new Date();
+      const year = viewedMonth.getFullYear();
+      const month = viewedMonth.getMonth();
+      const first = new Date(year, month, 1);
+      const startOffset = (first.getDay() + 6) % 7;
+      const gridStart = new Date(year, month, 1 - startOffset);
+      const names = ["L", "M", "X", "J", "V", "S", "D"];
+
+      monthTitle.textContent = monthFormatter.format(viewedMonth);
+      monthGrid.replaceChildren();
+
+      for (const name of names) {
+        const node = document.createElement("div");
+        node.className = "day-name";
+        node.textContent = name;
+        monthGrid.append(node);
+      }
+
+      for (let index = 0; index < 42; index += 1) {
+        const date = new Date(gridStart);
+        date.setDate(gridStart.getDate() + index);
+        const node = document.createElement("div");
+        node.className = "day";
+        node.textContent = date.getDate();
+        if (date.getMonth() !== month) node.classList.add("other");
+        if (sameDate(date, today)) node.classList.add("today");
+        monthGrid.append(node);
+      }
+    }
+
+    function normalizeUrl(value) {
+      const trimmed = value.trim();
+      if (!trimmed) return "";
+      return /^[a-z]+:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    }
+
+    function mountVideoIfPossible() {
+      if (location.protocol === "file:") return;
+
+      const iframe = document.createElement("iframe");
+      iframe.title = "Video de fondo";
+      iframe.src = "https://www.youtube-nocookie.com/embed/PQoLr7eVLUI?autoplay=1&mute=1&loop=1&playlist=PQoLr7eVLUI&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=" + encodeURIComponent(location.origin);
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+      iframe.referrerPolicy = "origin";
+      videoWrap.append(iframe);
+    }
+
+    document.querySelector("#prevMonth").addEventListener("click", () => {
+      viewedMonth.setMonth(viewedMonth.getMonth() - 1);
+      renderCalendar();
+    });
+
+    document.querySelector("#nextMonth").addEventListener("click", () => {
+      viewedMonth.setMonth(viewedMonth.getMonth() + 1);
+      renderCalendar();
+    });
+
+    document.querySelector("#todayMonth").addEventListener("click", () => {
+      viewedMonth = new Date();
+      viewedMonth.setDate(1);
+      renderCalendar();
+    });
+
+    webForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const url = normalizeUrl(webUrl.value);
+      if (!url) {
+        webFrame.removeAttribute("src");
+        webFrame.srcdoc = startPage;
+        localStorage.removeItem("wallpaper.webUrl");
+        return;
+      }
+      webUrl.value = url;
+      webFrame.removeAttribute("srcdoc");
+      webFrame.src = url;
+      localStorage.setItem("wallpaper.webUrl", url);
+    });
+
+    toggleWeb.addEventListener("click", () => {
+      webShell.classList.toggle("hide");
+      localStorage.setItem("wallpaper.webHidden", webShell.classList.contains("hide") ? "1" : "0");
+    });
+
+    const savedUrl = localStorage.getItem("wallpaper.webUrl");
+    if (savedUrl && savedUrl !== "https://www.google.com/search?igu=1") {
+      webUrl.value = savedUrl;
+      webFrame.src = savedUrl;
+    } else {
+      localStorage.removeItem("wallpaper.webUrl");
+      webFrame.srcdoc = startPage;
+    }
+    if (localStorage.getItem("wallpaper.webHidden") === "1") {
+      webShell.classList.add("hide");
+    }
+
+    mountVideoIfPossible();
+    tick();
+    renderCalendar();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>
