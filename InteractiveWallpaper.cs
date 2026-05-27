@@ -223,14 +223,18 @@ namespace InteractiveWallpaper
         private NotifyIcon trayIcon;
         private WidgetPanel clockWidget;
         private WidgetPanel calendarWidget;
-        private WidgetPanel notepadWidget;
+        private WidgetPanel weatherWidget;
         private Label clockTimeLabel;
         private Label clockDateLabel;
         private Label monthLabel;
         private TableLayoutPanel monthGrid;
         private FlowLayoutPanel eventsPanel;
         private Label eventsStatusLabel;
-        private TextBox notepadTextBox;
+        private Label weatherTempLabel;
+        private Label weatherDescLabel;
+        private Label weatherDetailsLabel;
+        private WebBrowser weatherMapBrowser;
+        private readonly System.Windows.Forms.Timer weatherTimer = new System.Windows.Forms.Timer();
 
         public MainForm(AppSettings settings, bool wallpaperMode)
         {
@@ -262,7 +266,7 @@ namespace InteractiveWallpaper
             BuildCommandDock();
             BuildClockWidget();
             BuildCalendarWidget();
-            BuildNotepadWidget();
+            BuildWeatherWidget();
 
             clockTimer.Interval = 1000;
             clockTimer.Tick += delegate { UpdateClock(); };
@@ -273,6 +277,11 @@ namespace InteractiveWallpaper
             calendarTimer.Tick += delegate { RefreshCalendarEvents(); };
             calendarTimer.Start();
             RefreshCalendarEvents();
+
+            weatherTimer.Interval = 15 * 60 * 1000;
+            weatherTimer.Tick += delegate { RefreshWeather(); };
+            weatherTimer.Start();
+            RefreshWeather();
         }
 
         protected override void OnShown(EventArgs e)
@@ -336,7 +345,7 @@ namespace InteractiveWallpaper
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Mostrar/Ocultar reloj", null, delegate { ToggleWidget(clockWidget, "Clock"); });
             menu.Items.Add("Mostrar/Ocultar calendario", null, delegate { ToggleWidget(calendarWidget, "Calendar"); });
-            menu.Items.Add("Mostrar/Ocultar notas", null, delegate { ToggleWidget(notepadWidget, "Notepad"); });
+            menu.Items.Add("Mostrar/Ocultar clima", null, delegate { ToggleWidget(weatherWidget, "Weather"); });
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Salir", null, delegate { Close(); });
 
@@ -361,7 +370,7 @@ namespace InteractiveWallpaper
 
             AddDockButton(dock, "Reloj", delegate { ToggleWidget(clockWidget, "Clock"); });
             AddDockButton(dock, "Cal", delegate { ToggleWidget(calendarWidget, "Calendar"); });
-            AddDockButton(dock, "Notas", delegate { ToggleWidget(notepadWidget, "Notepad"); });
+            AddDockButton(dock, "Clima", delegate { ToggleWidget(weatherWidget, "Weather"); });
             AddDockButton(dock, "Ajustes", delegate { ShowSettings(); });
             AddDockButton(dock, "Salir", delegate { Close(); });
 
@@ -468,32 +477,142 @@ namespace InteractiveWallpaper
             RenderMonth();
         }
 
-        private void BuildNotepadWidget()
+        private void BuildWeatherWidget()
         {
-            notepadWidget = new WidgetPanel("Blog de notas");
-            notepadWidget.Size = new Size(380, 280);
-            notepadWidget.Location = new Point(Math.Max(500, Width - 460), 150);
-            notepadWidget.ApplySettings(settings, "Notepad");
+            weatherWidget = new WidgetPanel("Clima en Barcelona");
+            weatherWidget.Size = new Size(410, 480);
+            weatherWidget.Location = new Point(Math.Max(500, Width - 490), 120);
+            weatherWidget.ApplySettings(settings, "Weather");
 
-            notepadTextBox = new TextBox();
-            notepadTextBox.Multiline = true;
-            notepadTextBox.ScrollBars = ScrollBars.Vertical;
-            notepadTextBox.Dock = DockStyle.Fill;
-            notepadTextBox.Text = settings.NotepadText;
-            notepadTextBox.BorderStyle = BorderStyle.None;
-            notepadTextBox.BackColor = Color.FromArgb(28, 255, 255, 255);
-            notepadTextBox.ForeColor = Color.White;
-            notepadTextBox.Font = new Font("Segoe UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point);
-            notepadTextBox.AcceptsReturn = true;
-            notepadTextBox.AcceptsTab = true;
+            Panel textPanel = new Panel();
+            textPanel.Dock = DockStyle.Top;
+            textPanel.Height = 110;
+            textPanel.BackColor = Color.FromArgb(22, 255, 255, 255);
+            textPanel.Padding = new Padding(12);
 
-            notepadTextBox.TextChanged += delegate
+            weatherTempLabel = new Label();
+            weatherTempLabel.Text = "--°C";
+            weatherTempLabel.ForeColor = Color.White;
+            weatherTempLabel.Font = new Font("Segoe UI Light", 26F, FontStyle.Regular, GraphicsUnit.Point);
+            weatherTempLabel.Dock = DockStyle.Left;
+            weatherTempLabel.Width = 110;
+            weatherTempLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+            Panel detailsWrap = new Panel();
+            detailsWrap.Dock = DockStyle.Fill;
+
+            weatherDescLabel = new Label();
+            weatherDescLabel.Text = "Cargando clima...";
+            weatherDescLabel.ForeColor = Color.FromArgb(244, 155, 95);
+            weatherDescLabel.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Regular, GraphicsUnit.Point);
+            weatherDescLabel.Dock = DockStyle.Top;
+            weatherDescLabel.Height = 24;
+            weatherDescLabel.TextAlign = ContentAlignment.BottomLeft;
+
+            weatherDetailsLabel = new Label();
+            weatherDetailsLabel.Text = "Humedad: --%  Viento: -- km/h";
+            weatherDetailsLabel.ForeColor = Color.FromArgb(210, 226, 232, 238);
+            weatherDetailsLabel.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            weatherDetailsLabel.Dock = DockStyle.Fill;
+            weatherDetailsLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+            detailsWrap.Controls.Add(weatherDetailsLabel);
+            detailsWrap.Controls.Add(weatherDescLabel);
+
+            textPanel.Controls.Add(detailsWrap);
+            textPanel.Controls.Add(weatherTempLabel);
+
+            weatherMapBrowser = new WebBrowser();
+            weatherMapBrowser.Dock = DockStyle.Fill;
+            weatherMapBrowser.ScriptErrorsSuppressed = true;
+            weatherMapBrowser.IsWebBrowserContextMenuEnabled = false;
+            weatherMapBrowser.AllowWebBrowserDrop = false;
+
+            weatherWidget.Body.Controls.Add(weatherMapBrowser);
+            weatherWidget.Body.Controls.Add(textPanel);
+            Controls.Add(weatherWidget);
+
+            try
             {
-                settings.NotepadText = notepadTextBox.Text;
-            };
+                weatherMapBrowser.Navigate("https://node.windy.com/embed2.html?lat=41.385&lon=2.173&zoom=8&level=surface&overlay=temp&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1");
+            }
+            catch { }
+        }
 
-            notepadWidget.Body.Controls.Add(notepadTextBox);
-            Controls.Add(notepadWidget);
+        private void RefreshWeather()
+        {
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                string json = null;
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        client.Encoding = Encoding.UTF8;
+                        client.Headers.Add("User-Agent", "InteractiveWallpaper/1.0");
+                        json = client.DownloadString("https://api.open-meteo.com/v1/forecast?latitude=41.3851&longitude=2.1734&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&timezone=Europe/Madrid");
+                    }
+                }
+                catch { }
+
+                if (json != null && !IsDisposed)
+                {
+                    BeginInvoke(new MethodInvoker(delegate
+                    {
+                        UpdateWeatherUI(json);
+                    }));
+                }
+            });
+        }
+
+        private void UpdateWeatherUI(string json)
+        {
+            try
+            {
+                System.Text.RegularExpressions.Match tempMatch = System.Text.RegularExpressions.Regex.Match(json, "\"temperature_2m\":\\s*([-\\d.]+)");
+                System.Text.RegularExpressions.Match appMatch = System.Text.RegularExpressions.Regex.Match(json, "\"apparent_temperature\":\\s*([-\\d.]+)");
+                System.Text.RegularExpressions.Match humMatch = System.Text.RegularExpressions.Regex.Match(json, "\"relative_humidity_2m\":\\s*([-\\d.]+)");
+                System.Text.RegularExpressions.Match windMatch = System.Text.RegularExpressions.Regex.Match(json, "\"wind_speed_10m\":\\s*([-\\d.]+)");
+                System.Text.RegularExpressions.Match codeMatch = System.Text.RegularExpressions.Regex.Match(json, "\"weather_code\":\\s*([-\\d.]+)");
+
+                string tempStr = tempMatch.Success ? Math.Round(double.Parse(tempMatch.Groups[1].Value, CultureInfo.InvariantCulture)).ToString() : "--";
+                string appStr = appMatch.Success ? Math.Round(double.Parse(appMatch.Groups[1].Value, CultureInfo.InvariantCulture)).ToString() : "--";
+                string humStr = humMatch.Success ? humMatch.Groups[1].Value : "--";
+                string windStr = windMatch.Success ? Math.Round(double.Parse(windMatch.Groups[1].Value, CultureInfo.InvariantCulture)).ToString() : "--";
+                int code = codeMatch.Success ? int.Parse(codeMatch.Groups[1].Value) : 0;
+
+                weatherTempLabel.Text = tempStr + "°C";
+                weatherDetailsLabel.Text = "Humedad: " + humStr + "%  Viento: " + windStr + " km/h\nSensación térmica: " + appStr + "°C";
+
+                string desc = "Despejado";
+                switch (code)
+                {
+                    case 0: desc = "Despejado"; break;
+                    case 1: desc = "Mayormente despejado"; break;
+                    case 2: desc = "Parcialmente nublado"; break;
+                    case 3: desc = "Nublado"; break;
+                    case 45:
+                    case 48: desc = "Niebla"; break;
+                    case 51:
+                    case 53:
+                    case 55: desc = "Llovizna"; break;
+                    case 61:
+                    case 63:
+                    case 65: desc = "Lluvia"; break;
+                    case 71:
+                    case 73:
+                    case 75: desc = "Nieve"; break;
+                    case 80:
+                    case 81:
+                    case 82: desc = "Chubascos"; break;
+                    case 95:
+                    case 96:
+                    case 99: desc = "Tormenta eléctrica"; break;
+                }
+
+                weatherDescLabel.Text = desc + " - Barcelona";
+            }
+            catch { }
         }
 
         private Button MakeSmallButton(string text)
@@ -709,7 +828,7 @@ namespace InteractiveWallpaper
         {
             clockWidget.SaveSettings(settings, "Clock");
             calendarWidget.SaveSettings(settings, "Calendar");
-            notepadWidget.SaveSettings(settings, "Notepad");
+            weatherWidget.SaveSettings(settings, "Weather");
             settings.Save();
         }
     }
