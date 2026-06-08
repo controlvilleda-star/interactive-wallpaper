@@ -138,16 +138,86 @@
       mask-image: linear-gradient(90deg, transparent, black 58%);
     }
 
-    .rail {
+    .rails-container {
       position: absolute;
       top: 24px;
       right: 24px;
       bottom: 24px;
-      width: min(410px, calc(100vw - 48px));
+      display: flex;
+      gap: 16px;
+      pointer-events: none;
+      z-index: 10;
+      max-height: calc(100vh - 48px);
+    }
+
+    .rail {
+      width: min(410px, calc(50vw - 32px));
       display: grid;
-      grid-template-rows: auto auto minmax(220px, 1fr);
+      grid-template-rows: auto;
       gap: 12px;
       align-content: start;
+      pointer-events: auto;
+      height: 100%;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-bottom: 24px;
+    }
+
+    .rail::-webkit-scrollbar {
+      display: none;
+    }
+
+    .financial-widget {
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .world-clocks {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .world-clock-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .world-clock-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .world-clock-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .world-clock-date {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .world-clock-time {
+      font-size: 26px;
+      font-weight: 300;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .world-clock-divider {
+      height: 1px;
+      background: var(--line);
+      opacity: 0.6;
     }
 
     .widget {
@@ -416,12 +486,20 @@
       display: none;
     }
 
-    @media (max-width: 720px) {
-      .rail {
+    @media (max-width: 900px) {
+      .rails-container {
         top: 12px;
         right: 12px;
         bottom: 12px;
-        width: calc(100vw - 24px);
+        left: 12px;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .rail {
+        width: 100%;
+        height: auto;
+        overflow-y: visible;
       }
 
       .clock {
@@ -431,6 +509,10 @@
 
       .time {
         font-size: 48px;
+      }
+
+      .financial-widget {
+        height: 130px;
       }
     }
   </style>
@@ -444,71 +526,165 @@
     <div class="wash"></div>
     <div class="grain"></div>
 
-    <section class="rail" aria-label="Widgets">
-      <article class="widget clock">
-        <div class="eyebrow">
-          <span>Escritorio vivo</span>
-          <span class="live-dot" aria-hidden="true"></span>
-        </div>
-        <div class="time" id="time">00:00</div>
-        <div class="date" id="date">Cargando fecha</div>
-      </article>
-
-      <article class="widget calendar">
-        <div class="calendar-head">
-          <div class="calendar-title" id="monthTitle">Mes</div>
-          <div class="calendar-actions">
-            <button class="icon-button" id="prevMonth" type="button" title="Mes anterior"
-              aria-label="Mes anterior">‹</button>
-            <button class="icon-button" id="todayMonth" type="button" title="Hoy" aria-label="Volver a hoy">•</button>
-            <button class="icon-button" id="nextMonth" type="button" title="Mes siguiente"
-              aria-label="Mes siguiente">›</button>
+    <div class="rails-container">
+      <!-- Columna 2 (Finanzas y Horarios - Izquierda) -->
+      <section class="rail" aria-label="Finanzas y Horarios">
+        <!-- Bitcoin Widget -->
+        <article class="widget financial-widget">
+          <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+            <div class="tradingview-widget-container__widget" style="height: 100%; width: 100%;"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+            {
+              "symbol": "BINANCE:BTCUSDT",
+              "width": "100%",
+              "height": "100%",
+              "locale": "es",
+              "dateRange": "1d",
+              "colorTheme": "dark",
+              "isTransparent": true,
+              "autosize": true,
+              "largeChartUrl": ""
+            }
+            </script>
           </div>
-        </div>
-        <div class="month-grid" id="monthGrid" aria-label="Calendario mensual"></div>
-      </article>
+        </article>
 
-      <article class="widget weather">
-        <div class="weather-head">
-          <div class="weather-title">Clima en Barcelona</div>
-          <span class="live-dot" style="background: var(--accent); box-shadow: 0 0 18px var(--accent);"></span>
-        </div>
-        <div class="weather-body">
-          <div class="weather-info">
-            <div class="weather-main">
-              <span class="weather-temp" id="weatherTemp">--°C</span>
-              <div class="weather-status">
-                <span class="weather-desc" id="weatherDesc">Cargando...</span>
-                <span class="weather-date" id="weatherDay">Hoy</span>
+        <!-- Tether Widget -->
+        <article class="widget financial-widget">
+          <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+            <div class="tradingview-widget-container__widget" style="height: 100%; width: 100%;"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+            {
+              "symbol": "COINBASE:USDTUSD",
+              "width": "100%",
+              "height": "100%",
+              "locale": "es",
+              "dateRange": "1d",
+              "colorTheme": "dark",
+              "isTransparent": true,
+              "autosize": true,
+              "largeChartUrl": ""
+            }
+            </script>
+          </div>
+        </article>
+
+        <!-- Gold Share Widget -->
+        <article class="widget financial-widget">
+          <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+            <div class="tradingview-widget-container__widget" style="height: 100%; width: 100%;"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+            {
+              "symbol": "AMEX:GLD",
+              "width": "100%",
+              "height": "100%",
+              "locale": "es",
+              "dateRange": "1d",
+              "colorTheme": "dark",
+              "isTransparent": true,
+              "autosize": true,
+              "largeChartUrl": ""
+            }
+            </script>
+          </div>
+        </article>
+
+        <!-- Relojes Mundiales Widget -->
+        <article class="widget world-clocks">
+          <div class="eyebrow">
+            <span>Relojes Mundiales</span>
+            <span class="live-dot" style="background: var(--accent); box-shadow: 0 0 18px var(--accent);"></span>
+          </div>
+          
+          <!-- Nueva York -->
+          <div class="world-clock-item">
+            <div class="world-clock-info">
+              <span class="world-clock-label">Nueva York</span>
+              <span class="world-clock-date" id="ny-date">Cargando fecha...</span>
+            </div>
+            <div class="world-clock-time" id="ny-time">00:00:00</div>
+          </div>
+          
+          <div class="world-clock-divider"></div>
+          
+          <!-- Wall Street Chino (Shanghái) -->
+          <div class="world-clock-item">
+            <div class="world-clock-info">
+              <span class="world-clock-label">Wall Street Chino (Shanghái)</span>
+              <span class="world-clock-date" id="china-date">Cargando fecha...</span>
+            </div>
+            <div class="world-clock-time" id="china-time">00:00:00</div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Columna 1 (Principal - Derecha) -->
+      <section class="rail" aria-label="Widgets Principales">
+        <article class="widget clock">
+          <div class="eyebrow">
+            <span>Escritorio vivo</span>
+            <span class="live-dot" aria-hidden="true"></span>
+          </div>
+          <div class="time" id="time">00:00</div>
+          <div class="date" id="date">Cargando fecha</div>
+        </article>
+
+        <article class="widget calendar">
+          <div class="calendar-head">
+            <div class="calendar-title" id="monthTitle">Mes</div>
+            <div class="calendar-actions">
+              <button class="icon-button" id="prevMonth" type="button" title="Mes anterior"
+                aria-label="Mes anterior">‹</button>
+              <button class="icon-button" id="todayMonth" type="button" title="Hoy" aria-label="Volver a hoy">•</button>
+              <button class="icon-button" id="nextMonth" type="button" title="Mes siguiente"
+                aria-label="Mes siguiente">›</button>
+            </div>
+          </div>
+          <div class="month-grid" id="monthGrid" aria-label="Calendario mensual"></div>
+        </article>
+
+        <article class="widget weather">
+          <div class="weather-head">
+            <div class="weather-title">Clima en Barcelona</div>
+            <span class="live-dot" style="background: var(--accent); box-shadow: 0 0 18px var(--accent);"></span>
+          </div>
+          <div class="weather-body">
+            <div class="weather-info">
+              <div class="weather-main">
+                <span class="weather-temp" id="weatherTemp">--°C</span>
+                <div class="weather-status">
+                  <span class="weather-desc" id="weatherDesc">Cargando...</span>
+                  <span class="weather-date" id="weatherDay">Hoy</span>
+                </div>
+              </div>
+              <div class="weather-icon" id="weatherIcon">⛅</div>
+            </div>
+            <div class="weather-details">
+              <div class="w-detail">
+                <span class="wd-label">Humedad</span>
+                <span class="wd-val" id="weatherHumidity">--%</span>
+              </div>
+              <div class="w-detail">
+                <span class="wd-label">Viento</span>
+                <span class="wd-val" id="weatherWind">-- km/h</span>
+              </div>
+              <div class="w-detail">
+                <span class="wd-label">Sensación</span>
+                <span class="wd-val" id="weatherApparent">--°C</span>
               </div>
             </div>
-            <div class="weather-icon" id="weatherIcon">⛅</div>
-          </div>
-          <div class="weather-details">
-            <div class="w-detail">
-              <span class="wd-label">Humedad</span>
-              <span class="wd-val" id="weatherHumidity">--%</span>
-            </div>
-            <div class="w-detail">
-              <span class="wd-label">Viento</span>
-              <span class="wd-val" id="weatherWind">-- km/h</span>
-            </div>
-            <div class="w-detail">
-              <span class="wd-label">Sensación</span>
-              <span class="wd-val" id="weatherApparent">--°C</span>
+            <div class="thermal-map-container">
+              <iframe 
+                id="thermalMap"
+                src="https://node.windy.com/embed2.html?lat=41.385&lon=2.173&zoom=8&level=surface&overlay=temp&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" 
+                title="Mapa Térmico de Barcelona"
+                allowfullscreen>
+              </iframe>
             </div>
           </div>
-          <div class="thermal-map-container">
-            <iframe 
-              id="thermalMap"
-              src="https://node.windy.com/embed2.html?lat=41.385&lon=2.173&zoom=8&level=surface&overlay=temp&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" 
-              title="Mapa Térmico de Barcelona"
-              allowfullscreen>
-            </iframe>
-          </div>
-        </div>
-      </article>
-    </section>
+        </article>
+      </section>
+    </div>
   </main>
 
   <script>
@@ -530,6 +706,41 @@
     const monthGrid = document.querySelector("#monthGrid");
     const videoWrap = document.querySelector(".video-wrap");
 
+    const nyTimeNode = document.querySelector("#ny-time");
+    const nyDateNode = document.querySelector("#ny-date");
+    const chinaTimeNode = document.querySelector("#china-time");
+    const chinaDateNode = document.querySelector("#china-date");
+
+    const nyTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
+
+    const nyDateFormatter = new Intl.DateTimeFormat("es-ES", {
+      timeZone: "America/New_York",
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
+
+    const chinaTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+      timeZone: "Asia/Shanghai",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
+
+    const chinaDateFormatter = new Intl.DateTimeFormat("es-ES", {
+      timeZone: "Asia/Shanghai",
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
+
     let viewedMonth = new Date();
     viewedMonth.setDate(1);
 
@@ -537,10 +748,25 @@
       return String(value).padStart(2, "0");
     }
 
+    function capitalizeFirstLetter(str) {
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
     function tick() {
       const now = new Date();
       timeNode.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       dateNode.textContent = spanish.format(now);
+
+      // Actualizar relojes mundiales
+      if (nyTimeNode && nyDateNode) {
+        nyTimeNode.textContent = nyTimeFormatter.format(now);
+        nyDateNode.textContent = capitalizeFirstLetter(nyDateFormatter.format(now));
+      }
+      if (chinaTimeNode && chinaDateNode) {
+        chinaTimeNode.textContent = chinaTimeFormatter.format(now);
+        chinaDateNode.textContent = capitalizeFirstLetter(chinaDateFormatter.format(now));
+      }
     }
 
     function sameDate(a, b) {
