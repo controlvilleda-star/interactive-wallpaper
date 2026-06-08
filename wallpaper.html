@@ -8,8 +8,8 @@
   <style>
     :root {
       color-scheme: dark;
-      --panel: rgba(12, 15, 20, 0.64);
-      --panel-strong: rgba(13, 17, 24, 0.78);
+      --panel: rgba(8, 10, 15, 0.82);
+      --panel-strong: rgba(10, 12, 18, 0.88);
       --line: rgba(255, 255, 255, 0.18);
       --text: #f7fbff;
       --muted: rgba(235, 244, 247, 0.72);
@@ -172,6 +172,13 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+    }
+
+    .tradingview-widget-container,
+    .tradingview-widget-container__widget,
+    .tradingview-widget-container iframe {
+      background: transparent !important;
+      background-color: transparent !important;
     }
 
     .world-clocks {
@@ -610,7 +617,7 @@
           <!-- Wall Street Chino (Shanghái) -->
           <div class="world-clock-item">
             <div class="world-clock-info">
-              <span class="world-clock-label">Wall Street Chino (Shanghái)</span>
+              <span class="world-clock-label">Shanghái</span>
               <span class="world-clock-date" id="china-date">Cargando fecha...</span>
             </div>
             <div class="world-clock-time" id="china-time">00:00:00</div>
