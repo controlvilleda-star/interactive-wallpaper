@@ -8,7 +8,6 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg-poster: url("https://i.ytimg.com/vi/3kYf4OCStJ8/maxresdefault.jpg");
       --panel: rgba(10, 12, 16, 0.36);
       --panel-strong: rgba(10, 12, 16, 0.52);
       --line: rgba(255, 255, 255, 0.18);
@@ -52,10 +51,9 @@
       overflow: hidden;
       z-index: -3;
       background: #080b0f;
-      background-image: var(--bg-poster);
+      background-image: url("https://i.ytimg.com/vi/PQoLr7eVLUI/maxresdefault.jpg");
       background-position: center;
       background-size: cover;
-      transition: background-image 0.5s ease;
     }
 
     .video-wrap iframe {
@@ -77,10 +75,9 @@
       inset: -4%;
       background:
         linear-gradient(110deg, rgba(20, 9, 42, .58), transparent 34%, rgba(245, 121, 57, .34) 58%, rgba(8, 13, 20, .46)),
-        var(--bg-poster) center / cover no-repeat;
+        url("https://i.ytimg.com/vi/PQoLr7eVLUI/maxresdefault.jpg") center / cover no-repeat;
       transform: scale(1.04);
       animation: ambientDrift 18s ease-in-out infinite alternate;
-      transition: background 0.5s ease;
     }
 
     .ambient-fallback::after {
@@ -525,200 +522,6 @@
         height: 130px;
       }
     }
-
-    /* Video Memory Pill & Switcher */
-    .video-control-pill {
-      position: fixed;
-      bottom: 24px;
-      left: 24px;
-      z-index: 25;
-      font-size: 13px;
-      user-select: none;
-    }
-
-    .video-pill-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 16px;
-      border-radius: 999px;
-      background: rgba(10, 12, 16, 0.48);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      color: var(--text);
-      cursor: pointer;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .video-pill-btn:hover {
-      background: rgba(18, 22, 30, 0.72);
-      border-color: rgba(244, 155, 95, 0.4);
-      transform: translateY(-2px);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
-    }
-
-    .video-pill-icon {
-      font-size: 14px;
-    }
-
-    .video-pill-title {
-      font-weight: 600;
-      letter-spacing: .02em;
-      max-width: 200px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .video-pill-arrow {
-      font-size: 9px;
-      color: var(--muted);
-      transition: transform 0.25s ease;
-    }
-
-    .video-pill-menu.open + .video-pill-btn .video-pill-arrow,
-    .video-control-pill.is-open .video-pill-arrow {
-      transform: rotate(180deg);
-    }
-
-    .video-pill-menu {
-      position: absolute;
-      bottom: calc(100% + 10px);
-      left: 0;
-      width: 320px;
-      background: rgba(10, 13, 18, 0.92);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 16px;
-      padding: 10px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(10px) scale(0.97);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .video-pill-menu.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
-    }
-
-    .video-pill-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 8px 6px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--accent);
-    }
-
-    .video-pill-badge {
-      font-size: 10px;
-      color: var(--muted);
-      font-weight: 500;
-      text-transform: none;
-      letter-spacing: normal;
-    }
-
-    .video-pill-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 260px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-    }
-
-    .video-pill-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text);
-      cursor: pointer;
-      width: 100%;
-      text-align: left;
-      transition: all 0.15s ease;
-    }
-
-    .video-pill-item:hover {
-      background: rgba(255, 255, 255, 0.07);
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    .video-pill-item.active {
-      background: rgba(244, 155, 95, 0.14);
-      border-color: rgba(244, 155, 95, 0.4);
-    }
-
-    .video-item-thumb {
-      width: 48px;
-      height: 28px;
-      border-radius: 6px;
-      object-fit: cover;
-      background: #000;
-      flex-shrink: 0;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .video-item-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .video-item-name {
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .video-item-desc {
-      font-size: 11px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .video-item-check {
-      font-size: 13px;
-      color: var(--accent);
-      opacity: 0;
-      flex-shrink: 0;
-    }
-
-    .video-pill-item.active .video-item-check {
-      opacity: 1;
-    }
-
-    @media (max-width: 900px) {
-      .video-control-pill {
-        bottom: 12px;
-        left: 12px;
-      }
-      .video-pill-menu {
-        width: 290px;
-      }
-    }
   </style>
 </head>
 
@@ -900,22 +703,6 @@
         </article>
       </section>
     </div>
-
-    <!-- Selector de Video de Fondo con Memoria -->
-    <div class="video-control-pill" id="videoControlPill">
-      <button class="video-pill-btn" id="videoToggleBtn" type="button" title="Videos de fondo en memoria" aria-haspopup="true" aria-expanded="false">
-        <span class="video-pill-icon">✨</span>
-        <span class="video-pill-title" id="videoPillTitle">Cozy Christmas Jazz</span>
-        <span class="video-pill-arrow" id="videoPillArrow">▲</span>
-      </button>
-      <div class="video-pill-menu" id="videoPillMenu">
-        <div class="video-pill-header">
-          <span>Videos en Memoria</span>
-          <span class="video-pill-badge" id="videoCountBadge">2 guardados</span>
-        </div>
-        <div class="video-pill-list" id="videoPillList"></div>
-      </div>
-    </div>
   </main>
 
   <script>
@@ -1064,135 +851,15 @@
       return /^[a-z]+:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
     }
 
-    // ==========================================
-    // MEMORIA DE VIDEOS DE FONDO (PRESETS)
-    // ==========================================
-    // Video activo actual: 3kYf4OCStJ8 (Cozy Christmas Jazz)
-    // Video anterior en memoria: PQoLr7eVLUI (Gradient Mood Lights)
-    const VIDEO_MEMORY = [
-      {
-        id: "3kYf4OCStJ8",
-        title: "Cozy Christmas Jazz",
-        desc: "Winter Cafe Music & Study Focus",
-        url: "https://youtu.be/3kYf4OCStJ8?si=54GChkwJOxNfdf4i",
-        poster: "https://i.ytimg.com/vi/3kYf4OCStJ8/maxresdefault.jpg"
-      },
-      {
-        id: "PQoLr7eVLUI",
-        title: "Gradient Mood Lights",
-        desc: "4K Smooth LED Lights Ambient",
-        url: "https://www.youtube.com/watch?v=PQoLr7eVLUI",
-        poster: "https://i.ytimg.com/vi/PQoLr7eVLUI/maxresdefault.jpg"
-      }
-    ];
-
-    let currentVideoId = localStorage.getItem("interactive_wallpaper_video_id") || "3kYf4OCStJ8";
-    if (!VIDEO_MEMORY.some(v => v.id === currentVideoId)) {
-      currentVideoId = "3kYf4OCStJ8";
-    }
-
-    function renderVideoMenu() {
-      const listNode = document.querySelector("#videoPillList");
-      if (!listNode) return;
-      listNode.innerHTML = "";
-
-      VIDEO_MEMORY.forEach((video) => {
-        const item = document.createElement("button");
-        item.type = "button";
-        item.className = "video-pill-item" + (video.id === currentVideoId ? " active" : "");
-        item.innerHTML = `
-          <img class="video-item-thumb" src="${video.poster}" alt="" loading="lazy">
-          <div class="video-item-meta">
-            <span class="video-item-name">${video.title}</span>
-            <span class="video-item-desc">${video.desc}</span>
-          </div>
-          <span class="video-item-check">✓</span>
-        `;
-        item.addEventListener("click", () => {
-          setBackgroundVideo(video.id);
-          closeVideoMenu();
-        });
-        listNode.append(item);
-      });
-
-      const titleNode = document.querySelector("#videoPillTitle");
-      const currentVideo = VIDEO_MEMORY.find(v => v.id === currentVideoId) || VIDEO_MEMORY[0];
-      if (titleNode && currentVideo) {
-        titleNode.textContent = currentVideo.title;
-      }
-    }
-
-    function setBackgroundVideo(videoId) {
-      currentVideoId = videoId;
-      localStorage.setItem("interactive_wallpaper_video_id", videoId);
-
-      const videoData = VIDEO_MEMORY.find(v => v.id === videoId) || VIDEO_MEMORY[0];
-
-      // Actualizar poster en variable CSS
-      document.documentElement.style.setProperty("--bg-poster", `url("${videoData.poster}")`);
-
-      renderVideoMenu();
-
+    function mountVideoIfPossible() {
       if (location.protocol === "file:") return;
 
-      const srcUrl = "https://www.youtube-nocookie.com/embed/" + videoId + "?autoplay=1&mute=1&loop=1&playlist=" + videoId + "&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=" + encodeURIComponent(location.origin);
-
-      let iframe = videoWrap.querySelector("iframe");
-      if (!iframe) {
-        iframe = document.createElement("iframe");
-        iframe.title = "Video de fondo";
-        iframe.allow = "autoplay; encrypted-media; picture-in-picture";
-        iframe.referrerPolicy = "origin";
-        iframe.src = srcUrl;
-        videoWrap.append(iframe);
-      } else {
-        if (iframe.src !== srcUrl) {
-          iframe.src = srcUrl;
-        }
-      }
-    }
-
-    function closeVideoMenu() {
-      const menu = document.querySelector("#videoPillMenu");
-      const pill = document.querySelector("#videoControlPill");
-      const btn = document.querySelector("#videoToggleBtn");
-      if (menu) menu.classList.remove("open");
-      if (pill) pill.classList.remove("is-open");
-      if (btn) btn.setAttribute("aria-expanded", "false");
-    }
-
-    function toggleVideoMenu() {
-      const menu = document.querySelector("#videoPillMenu");
-      const pill = document.querySelector("#videoControlPill");
-      const btn = document.querySelector("#videoToggleBtn");
-      if (!menu) return;
-      const isOpen = menu.classList.toggle("open");
-      if (pill) pill.classList.toggle("is-open", isOpen);
-      if (btn) btn.setAttribute("aria-expanded", String(isOpen));
-    }
-
-    function initVideoControls() {
-      const btn = document.querySelector("#videoToggleBtn");
-      if (btn) {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          toggleVideoMenu();
-        });
-      }
-
-      document.addEventListener("click", (e) => {
-        const pill = document.querySelector("#videoControlPill");
-        if (pill && !pill.contains(e.target)) {
-          closeVideoMenu();
-        }
-      });
-
-      renderVideoMenu();
-      setBackgroundVideo(currentVideoId);
-    }
-
-    function mountVideoIfPossible() {
-      initVideoControls();
+      const iframe = document.createElement("iframe");
+      iframe.title = "Video de fondo";
+      iframe.src = "https://www.youtube-nocookie.com/embed/PQoLr7eVLUI?autoplay=1&mute=1&loop=1&playlist=PQoLr7eVLUI&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=" + encodeURIComponent(location.origin);
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+      iframe.referrerPolicy = "origin";
+      videoWrap.append(iframe);
     }
 
     document.querySelector("#prevMonth").addEventListener("click", () => {
