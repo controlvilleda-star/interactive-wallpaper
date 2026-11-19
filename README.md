@@ -47,9 +47,12 @@ Tambien hay una version HTML lista para cargar en Lively Wallpaper o abrir en el
 wallpaper.html
 ```
 
-Usa el video de YouTube indicado como fondo, con reloj, calendario y ventana web colocados a la derecha.
+Usa video de YouTube de fondo, con reloj, relojes mundiales, clima, widgets financieros y calendario.
+Incluye un selector de video flotante con memoria para alternar entre fondos:
+- **Actual:** Cozy Christmas Jazz (`3kYf4OCStJ8`) - Música relajante de invierno / café para concentración.
+- **Anterior en memoria:** Gradient Mood Lights 4K (`PQoLr7eVLUI`) - Luces ambientales suaves en gradiente.
 
-Si abres el HTML directamente como archivo, YouTube puede bloquear el reproductor. En ese caso el fondo usa una version ambiental sin el error del iframe. Para intentar cargar el video real, abre:
+Si abres el HTML directamente como archivo, YouTube puede bloquear el reproductor. En ese caso el fondo usa una version ambiental animada con el poster oficial sin el error del iframe. Para cargar el reproductor real en bucle, abre:
 
 ```text
 abrir_wallpaper_http.cmd
